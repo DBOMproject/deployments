@@ -1,0 +1,75 @@
+version: "3.5"
+services:
+  chainsource-gateway:
+    image: dbomproject/chainsource-gateway:latest
+    networks:
+      - dbom
+    ports:
+      - 3000:3000
+    volumes:
+      - "./agent-config.yaml:/app/config/agent-config.yaml"
+    environment:
+      - LOG_LEVEL=info
+      - PORT=3000
+  mongodb-audit-watcher:
+    build: dbomproject/mongodb-audit-watcher:latest
+    networks:
+      - dbom
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - MONGO_HOST=mongodb
+      - MONGO_PORT=27017
+      - MONGO_USER=root
+      - CHANNEL_DB=primary
+      - AUDIT_POSTFIX=_audit
+      - MONGO_PASS=rootpassword
+      - MONGO_REPLICA_SET_NAME=rs0
+      - PERSIST_PATH=/var/audit-persist
+    volumes:
+      - mongodb_audit_watcher_persist:/var/audit-persist
+  database-agent:
+    build: dbomproject/database-agent:latest
+    networks:
+      - dbom
+    ports:
+      - 3500:3500
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - MONGO_HOST=mongodb
+      - MONGO_PORT=27017
+      - MONGO_USER=root
+      - CHANNEL_DB=primary
+      - AUDIT_POSTFIX=_audit
+      - MONGO_PASS=rootpassword
+      - MONGO_REPLICA_SET_NAME=rs0
+  mongodb: 
+      image: mongo:latest
+      networks:
+        - dbom
+      environment:
+        MONGO_INITDB_ROOT_USERNAME: root
+        MONGO_INITDB_ROOT_PASSWORD: rootpassword
+        MONGO_REPLICA_SET_NAME: rs0
+      healthcheck:
+        test: test $$(echo "rs.initiate().ok || rs.status().ok" | mongo -u $${MONGO_INITDB_ROOT_USERNAME} -p $${MONGO_INITDB_ROOT_PASSWORD} --quiet) -eq 1
+        interval: 10s
+        timeout: 10s
+        retries: 5
+        start_period: 30s
+      command: ["--replSet", "rs0", "--bind_ip_all"]
+      ports:
+        - 27017:27017
+      volumes:
+      - mongodb_data:/data/db
+      
+volumes:
+  chainsource_data:
+  mongodb_data:
+  mongodb_audit_watcher_persist:
+
+networks:
+  dbom:
