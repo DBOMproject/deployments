@@ -4,7 +4,7 @@ This repository contains the deployment artifacts that can be used to deploy pro
 
 ## Usage
 
-- [Deploying to Kubernetes using Helm Charts][charts/]
+- [Deploying to Kubernetes using Helm Charts](charts/)
 - [Deploying to Docker Compose](docker-compose-quickstart/)
 
 
