@@ -1,0 +1,72 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "PGP-Service.fullname" . }}
+  labels:
+    {{- include "PGP-Service.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "PGP-Service.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "PGP-Service.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "PGP-Service.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - envFrom:
+            - configMapRef:
+                name: {{ include "PGP-Service.fullname" . }}--pgp--config
+          image: {{ .Values.pgp.serviceImage | quote }}
+          imagePullPolicy: Always
+          name: pgp-service    
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          volumeMounts:
+          - mountPath: /keys/{{ .Values.pgp.config.secret }}
+            name: pgp
+      initContainers:
+      - env:
+        - name: NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        envFrom:
+          - configMapRef:
+              name: {{ include "PGP-Service.fullname" . }}--pgp--config
+        image: {{ .Values.pgp.createImage | quote }}
+        imagePullPolicy: Always
+        name: pgp-create
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      volumes:
+      - name: pgp
+        secret:
+          defaultMode: 256
+          optional: true
+          secretName: {{ .Values.pgp.config.secret }}
