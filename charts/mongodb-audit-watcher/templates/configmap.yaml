@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "mongodb-audit-watcher.fullname" . }}-config
+data:
+  LOG_LEVEL: {{ .Values.logging.level }}
+  MONGO_HOST: {{ .Values.mongoDBAuditWatcher.mongohost }}
+  MONGO_PASS_KEY: {{ .Values.mongoDBAuditWatcher.mongoPasswordKey }}
+  MONGO_PORT: "27017"
+  MONGO_USER: root
+  MONGO_REPLICA_SET_NAME: {{ .Values.mongoDBAuditWatcher.mongoReplicaSetName }}
+  CHANNEL_DB: primary
+  AUDIT_POSTFIX: _audit
+  PERSIST_PATH: {{ .Values.mongoDBAuditWatcher.persistPath }}
+

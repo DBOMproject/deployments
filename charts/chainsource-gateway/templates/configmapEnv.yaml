@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Values.chainsourceGateway.configmapEnv}}
+data:
+  LOG_LEVEL: 'info'
+  JAEGER_ENABLED: {{.Values.jaeger.enabled | quote }}
+  JAEGER_HOST: {{.Values.jaeger.host | quote }}
+  JAEGER_SAMPLER_PARAM: {{.Values.jaeger.sampler.param | quote }}
+  JAEGER_SAMPLER_TYPE: {{.Values.jaeger.sampler.type | quote }}
+  JAEGER_SERVICE_NAME: {{.Values.jaeger.serviceName | quote }}
+  JAEGER_AGENT_SIDECAR_ENABLED: {{.Values.jaeger.agent.sidecar.enabled | quote }}

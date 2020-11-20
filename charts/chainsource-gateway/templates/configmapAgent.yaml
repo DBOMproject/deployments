@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Values.chainsourceGateway.configmapAgent}}
+data:
+  agent-config.yaml: |
+    meta:
+        version: v1.0
+    agents:
+      - DB1:
+          version: 1
+          host: database-agent
+          port: 80
+          enabled: True
+      - iota:
+          version: 1
+          host: iota-agent
+          port: 80
+          enabled: True

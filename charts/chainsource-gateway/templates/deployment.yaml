@@ -1,0 +1,75 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "chainsource-gateway.fullname" . }}
+  labels:
+  {{- include "chainsource-gateway.labels" . | nindent 4 }}
+  annotations:
+    {{- if  .Values.jaeger.agent.sidecar.enabled }}
+    sidecar.jaegertracing.io/inject: {{ .Values.jaeger.agent.sidecar.name | quote  }}
+  {{- end }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+  {{- include "chainsource-gateway.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+    {{- include "chainsource-gateway.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "chainsource-gateway.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ .Values.chainsourceGateway.configmapEnv }}
+          volumeMounts:
+            - mountPath: /app/config
+              name: config-volume
+          ports:
+            - name: http
+              containerPort: {{ .Values.chainsourceGateway.port}}
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+        - envFrom:
+            - configMapRef:
+                name: {{ include "chainsource-gateway.fullname" . }}--pgp--config
+          image: {{ .Values.pgp.serviceImage | quote }}
+          imagePullPolicy: Always
+          name: pgp-service    
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{.Values.chainsourceGateway.configmapAgent}}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

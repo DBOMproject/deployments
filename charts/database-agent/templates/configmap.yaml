@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{.Values.databaseAgent.depname}}-config
+data:
+  LOG_LEVEL: {{ .Values.logging.level }}
+  MONGO_HOST: {{ .Values.databaseAgent.mongohost }}
+  MONGO_PASS_KEY: {{ .Values.databaseAgent.mongoPasswordKey }}
+  MONGO_PORT: "27017"
+  MONGO_USER: root
+  MONGO_REPLICA_SET_NAME: {{ .Values.databaseAgent.mongoReplicaSetName }}
+  CHANNEL_DB: primary
+  AUDIT_POSTFIX: _audit
+  JAEGER_ENABLED: {{.Values.jaeger.enabled | quote }}
+  JAEGER_HOST: {{.Values.jaeger.host | quote }}
+  JAEGER_SAMPLER_PARAM: {{.Values.jaeger.sampler.param | quote }}
+  JAEGER_SAMPLER_TYPE: {{.Values.jaeger.sampler.type | quote }}
+  JAEGER_SERVICE_NAME: {{.Values.jaeger.serviceName | quote }}
+  JAEGER_AGENT_SIDECAR_ENABLED: {{.Values.jaeger.agent.sidecar.enabled | quote }}

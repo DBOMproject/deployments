@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "iota-agent.fullname" . }}
+  labels:
+    {{- include "iota-agent.labels" . | nindent 4 }}
+  annotations: 
+  {{- if  .Values.jaeger.agent.sidecar.enabled }}
+    sidecar.jaegertracing.io/inject: {{ .Values.jaeger.agent.sidecar.name | quote  }}
+  {{- end }}
+spec:
+  serviceName: {{ include "iota-agent.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "iota-agent.selectorLabels" . | nindent 6 }}
+  volumeClaimTemplates:
+    {{ if .Values.jsonDB.enabled }}
+    - metadata:
+        name: db
+      spec:
+        accessModes:
+          - {{ .Values.persistence.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+        storageClassName: {{ .Values.persistence.storageClass | quote }}
+    {{ end }}
+  template:
+    metadata:
+      labels:
+        {{- include "iota-agent.selectorLabels" . | nindent 8 }}
+    spec:
+    {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+      serviceAccountName: {{ include "iota-agent.serviceAccountName" . }}
+      securityContext:
+        {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: jaeger-agent
+          image: jaegertracing/jaeger-agent:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5775
+              name: zk-compact-trft
+              protocol: UDP
+            - containerPort: 5778
+              name: config-rest
+              protocol: TCP
+            - containerPort: 6831
+              name: jg-compact-trft
+              protocol: UDP
+            - containerPort: 6832
+              name: jg-binary-trft
+              protocol: UDP
+            - containerPort: 14271
+              name: admin-http
+              protocol: TCP
+          args:
+            - --reporter.grpc.host-port=dns:///jaeger-blockchain-collector-headless.jaeger:14250
+            - --reporter.type=grpc
+        - name: {{ .Chart.Name }}
+          securityContext:
+            {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ include "iota-agent.fullname" . }}--config
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          {{ if .Values.jsonDB.enabled }}
+          volumeMounts:
+            - mountPath: /usr/src/app/{{ .Values.jsonDB.path }}
+              name: db
+          {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+    {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}
+    {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+    {{- end }}

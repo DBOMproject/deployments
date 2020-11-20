@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ include "mongodb-audit-watcher.fullname" . }}
+  labels:
+  {{- include "mongodb-audit-watcher.labels" . | nindent 4 }}
+spec:
+  serviceName: {{ include "mongodb-audit-watcher.fullname" . }}
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+  {{- include "mongodb-audit-watcher.selectorLabels" . | nindent 6 }}
+  volumeClaimTemplates:
+    {{ if .Values.persistence.enabled }}
+    - metadata:
+        name: token-store
+      spec:
+        accessModes:
+          - {{ .Values.persistence.accessMode }}
+        resources:
+          requests:
+            storage: {{ .Values.persistence.size }}
+        storageClassName: {{ .Values.persistence.storageClass | quote }}
+  {{ end }}
+  template:
+    metadata:
+      labels:
+    {{- include "mongodb-audit-watcher.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      serviceAccountName: {{ include "mongodb-audit-watcher.serviceAccountName" . }}
+      securityContext:
+      {{- toYaml .Values.podSecurityContext | nindent 8 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          securityContext:
+          {{- toYaml .Values.securityContext | nindent 12 }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          envFrom:
+            - configMapRef:
+                name: {{ include "mongodb-audit-watcher.fullname" . }}-config
+            - secretRef:
+                name: {{ .Values.mongoDBAuditWatcher.mongoSecret }}
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+          {{ if .Values.persistence.enabled }}
+          volumeMounts:
+            - mountPath: {{ .Values.mongoDBAuditWatcher.persistpath }}
+              name: token-store
+      {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+      {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+    {{- toYaml . | nindent 8 }}
+  {{- end }}
