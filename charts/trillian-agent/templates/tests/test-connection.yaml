@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: "{{ include "trillian-agent.fullname" . }}-test-connection"
+  labels:
+    {{- include "trillian-agent.labels" . | nindent 4 }}
+  annotations:
+    "helm.sh/hook": test-success
+spec:
+  containers:
+    - name: wget
+      image: busybox
+      command: ['wget']
+      args: ['{{ include "trillian-agent.fullname" . }}:{{ .Values.service.port }}']
+  restartPolicy: Never
