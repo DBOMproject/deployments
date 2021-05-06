@@ -19,7 +19,7 @@ version: "3.5"
 
 services:
   chainsource-gateway:
-    image: dbomproject/chainsource-gateway:experimental-arm-support
+    image: dbomproject/chainsource-gateway:latest
     networks:
       - dbom
     ports:
@@ -30,7 +30,7 @@ services:
       - LOG_LEVEL=info
       - PORT=3000
   mongodb-audit-watcher:
-    image: dbomproject/mongodb-audit-watcher:experimental-arm-support
+    image: dbomproject/mongodb-audit-watcher:latest
     networks:
       - dbom
     environment:
@@ -46,7 +46,7 @@ services:
     volumes:
       - /var/audit-persist
   database-agent:
-    image: dbomproject/database-agent:experimental-arm-support
+    image: dbomproject/database-agent:latest
     networks:
       - dbom
     ports:
@@ -66,3 +66,4 @@ volumes:
 
 networks:
   dbom:
+
