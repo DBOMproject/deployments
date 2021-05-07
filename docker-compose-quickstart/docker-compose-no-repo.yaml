@@ -1,7 +1,6 @@
-# This is a version of the DBoM Quickstart Docker compose for ARM
-# The primary change is that you will have to provide a working mongodb instance that is running as a replicaset
+# This is a version of the DBoM Quickstart Docker Compose that relies on an external mongodb instance
+# This may be useful to evaluate DBoM on machines where you wouldn't want to run the repository locally (eg. ARM devices e.t.c)
 # For evaluation purposes, you can use free shared hosting services such as MongoDB Atlas
-
 
 # Before launching this docker compose file, please export the following environment variables
 #   DBOM_MONGO_HOST
@@ -13,9 +12,7 @@
 #   DBOM_MONGO_URI
 # If you are using the URI, modify the below compose file to update
 
-
 version: "3.5"
-
 
 services:
   chainsource-gateway:
