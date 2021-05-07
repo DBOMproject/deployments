@@ -1,0 +1,69 @@
+# This is a version of the DBoM Quickstart Docker compose for ARM
+# The primary change is that you will have to provide a working mongodb instance that is running as a replicaset
+# For evaluation purposes, you can use free shared hosting services such as MongoDB Atlas
+
+
+# Before launching this docker compose file, please export the following environment variables
+#   DBOM_MONGO_HOST
+#   DBOM_MONGO_PORT
+#   DBOM_MONGO_USER
+#   DBOM_MONGO_PASS
+#   DBOM_MONGO_REPLICA_SET_NAME
+# or if you'd like to directly use a URI 
+#   DBOM_MONGO_URI
+# If you are using the URI, modify the below compose file to update
+
+
+version: "3.5"
+
+
+services:
+  chainsource-gateway:
+    image: dbomproject/chainsource-gateway:latest
+    networks:
+      - dbom
+    ports:
+      - 3000:3000
+    volumes:
+      - "./agent-config.yaml:/app/config/agent-config.yaml"
+    environment:
+      - LOG_LEVEL=info
+      - PORT=3000
+  mongodb-audit-watcher:
+    image: dbomproject/mongodb-audit-watcher:latest
+    networks:
+      - dbom
+    environment:
+      - MONGO_HOST=${DBOM_MONGO_HOST}
+      - MONGO_PORT=${DBOM_MONGO_PORT}
+      - MONGO_USER=${DBOM_MONGO_USER}
+      - CHANNEL_DB=primary
+      - AUDIT_POSTFIX=_audit
+      - MONGO_PASS=${DBOM_MONGO_PASS}
+      # - MONGO_URI=${DBOM_MONGO_URI}
+      - MONGO_REPLICA_SET_NAME=${DBOM_MONGO_REPLICA_SET_NAME}
+      - PERSIST_PATH=/var/audit-persist
+    volumes:
+      - /var/audit-persist
+  database-agent:
+    image: dbomproject/database-agent:latest
+    networks:
+      - dbom
+    ports:
+      - 3500:3500
+    environment:
+      - MONGO_HOST=${DBOM_MONGO_HOST}
+      - MONGO_PORT=${DBOM_MONGO_PORT}
+      - MONGO_USER=${DBOM_MONGO_USER}
+      - CHANNEL_DB=primary
+      - AUDIT_POSTFIX=_audit
+      # - MONGO_URI=${DBOM_MONGO_URI}
+      - MONGO_PASS=${DBOM_MONGO_PASS}
+      - MONGO_REPLICA_SET_NAME=${DBOM_MONGO_REPLICA_SET_NAME}
+
+volumes:
+  chainsource_data:
+
+networks:
+  dbom:
+
