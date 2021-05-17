@@ -65,7 +65,7 @@ This Helm chart is a lightweight way to configure and run the official
 | Parameter                                            | Description                                                                | Default                      |
 | ---------------------------------------------------- | -------------------------------------------------------------------------- | ---------------------------- |
 | `affinity`                                           | Configurable [affinity]                                                    | {}                           |
-| `fullnameOverride`                                   | Overrides the full name of the resources. "                                | `""`                         |
+| `fullnameOverride`                                   | Overrides the full name of the resources.                                  | `""`                         |
 | `image.repository`                                   | `database-agent` image repository                                          | `dbomproject/database-agent` |
 | `image.tag`                                          | `database-agent` image tag                                                 | `1.0.0`                      |
 | `image.pullPolicy`                                   | The Kubernetes [imagePullPolicy] value                                     | `IfNotPresent`               |
@@ -80,12 +80,12 @@ This Helm chart is a lightweight way to configure and run the official
 | `databaseAgent.mongoConnectionTimeout`               | Timeout for initial connection to mongodb                                  | `3000`                       |
 | `databaseAgent.mongoTLS.enabled`                     | Whether TLS connections and X509 authentication & authorization is enabled | `false`                      |
 | `databaseAgent.mongoTLS.allowInvalidHosts`           | Whether the host portion of the certificate is validated                   | `false`                      |
-| `databaseAgent.mongoTLS.certs.secret`                | Name of secret where certificates are declared                             | `-`                          |
+| `databaseAgent.mongoTLS.certs.secret`                | Name of secret where certificates are declared                             | `""`                         |
 | `databaseAgent.mongoTLS.certs.secretPath`            | Path where certificates in the secret are to be mounted                    | `/secrets/`                  |
 | `databaseAgent.mongoTLS.certs.caCertKey`             | The key in the secret where the CA certificate is declared                 | `ca.pem`                     |
 | `databaseAgent.mongoTLS.certs.clientCertKey`         | The key in the secret where the client certificate is declared             | `client.pem`                 |
 | `databaseAgent.mongoTLS.certs.clientCertIsEncrypted` | Whether the client certificate is encrypted with a passphrase              | `false`                      |
-| `databaseAgent.mongoTLS.certs.clientCertPassSecret`  | If client certificate is encrypted, secret where passkey is stored         | `-`                          |
+| `databaseAgent.mongoTLS.certs.clientCertPassSecret`  | If client certificate is encrypted, secret where passkey is stored         | `""`                         |
 | `databaseAgent.mongoTLS.certs.clientCertPassKey`     | If client certificate is encrypted, key of the passkey in the secret       | `MONGO_TLS_CLIENT_CERT_PASS` |
 | `ingress`                                            | [ingress] to expose the database agent service.                            | see [values.yaml]            |
 | `jaeger.agent.sidecar.enabled`                       | Is Jaeger Agent Sidecar Injection Enabled                                  | `false`                      |
