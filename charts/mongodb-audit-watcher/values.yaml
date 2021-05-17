@@ -6,6 +6,7 @@ replicaCount: 1
 
 image:
   repository: dbomproject/mongodb-audit-watcher
+  tag: latest
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []
@@ -18,6 +19,19 @@ mongoDBAuditWatcher:
   mongoPasswordKey: mongodb-root-password
   mongoSecret: mongodb
   mongoReplicaSetName: rs0
+  mongoServerSelectionTimeout: 3000
+  mongoConnectionTimeout: 3000
+  mongoTLS: 
+    enabled: false
+    allowInvalidHosts: false
+    certs:
+      secret: ""
+      secretPath: /secrets/
+      caCertKey: ca.pem
+      clientCertKey: client.pem
+      clientCertIsEncrypted: false 
+      clientCertPassSecret: ""
+      clientCertPassKey: "MONGO_TLS_CLIENT_CERT_PASS"
 
 logging:
   level: info
@@ -31,7 +45,6 @@ persistence:
   ##   set, choosing the default provisioner.  (gp2 on AWS, standard on
   ##   GKE, AWS & OpenStack)
   ##
-  storageClass: nfs-client
   accessMode: ReadWriteOnce
   size: 100Mi
   # existingClaim: ""

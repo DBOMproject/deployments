@@ -45,13 +45,22 @@ spec:
                 name: {{ include "mongodb-audit-watcher.fullname" . }}-config
             - secretRef:
                 name: {{ .Values.mongoDBAuditWatcher.mongoSecret }}
+          {{ if .Values.mongoDBAuditWatcher.mongoTLS.certs.clientCertIsEncrypted }}
+            - secretRef:
+                name: {{ .Values.mongoDBAuditWatcher.mongoTLS.certs.clientCertPassSecret }}
+          {{ end }}
           resources:
           {{- toYaml .Values.resources | nindent 12 }}
-          {{ if .Values.persistence.enabled }}
           volumeMounts:
-            - mountPath: {{ .Values.mongoDBAuditWatcher.persistpath }}
+          {{ if .Values.persistence.enabled }}
+            - mountPath: {{ .Values.mongoDBAuditWatcher.persistPath }}
               name: token-store
-      {{ end }}
+          {{ end }}
+           {{ if .Values.mongoDBAuditWatcher.mongoTLS.enabled }}
+            - mountPath: {{ .Values.mongoDBAuditWatcher.mongoTLS.certs.secretPath }}
+              name: certs-vol
+              readOnly: true
+          {{ end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
       {{- toYaml . | nindent 8 }}
@@ -64,3 +73,10 @@ spec:
       tolerations:
     {{- toYaml . | nindent 8 }}
   {{- end }}
+    {{ if .Values.mongoDBAuditWatcher.mongoTLS.enabled }}
+      volumes:
+      - name: certs-vol
+        secret:
+          secretName: {{ .Values.mongoDBAuditWatcher.mongoTLS.certs.secret }}
+    {{ end }}
+
