@@ -7,13 +7,14 @@ This Helm chart is a lightweight way to configure and run the official
 <!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
 
 
-- [Requirements](#requirements)
-- [Installing](#installing)
-  - [Install released version using Helm repository](#install-released-version-using-helm-repository)
-  - [Install development version using master branch](#install-development-version-using-master-branch)
-- [Upgrading](#upgrading)
-- [Mongo DB](#mongo-db)
-- [Configuration](#configuration)
+- [DBoM MongoDB Audit Watcher Helm Chart](#dbom-mongodb-audit-watcher-helm-chart)
+  - [Requirements](#requirements)
+  - [Installing](#installing)
+    - [Install released version using Helm repository](#install-released-version-using-helm-repository)
+    - [Install development version using master branch](#install-development-version-using-master-branch)
+  - [Upgrading](#upgrading)
+  - [Mongo DB](#mongo-db)
+  - [Configuration](#configuration)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 <!-- Use this to update TOC: -->
@@ -61,35 +62,46 @@ This Helm chart is a lightweight way to configure and run the official
 
 ## Configuration
 
-| Parameter                               | Description                                                        | Default                                        |
-|-----------------------------------------|--------------------------------------------------------------------|------------------------------------------------|
-| `affinity`                              | Configurable [affinity]                                            | {}                                             |
-| `fullnameOverride`                      | Overrides the full name of the resources. "                        | `""`                                           |
-| `image.repository`                      | `database-agent` image repository                                  | `dbomproject/mongodb-audit-watcher`            |
-| `image.tag`                             | `database-agent` image tag                                         | `1.0.0`                                        |
-| `image.pullPolicy`                      | The Kubernetes [imagePullPolicy] value                             | `IfNotPresent`                                 |
-| `imagePullSecrets`                      | Configuration for [imagePullSecrets] for using a private registry  | `[]`                                           |
-| `mongoAuditWatcher.persistPath`         | Path to persistent storage                                         | `database-agent`                               |
-| `mongoAuditWatcher.mongohost`           | Mongo host to connect to                                           | `mongodb`                                      |
-| `mongoAuditWatcher.mongoReplicaSetName` | Replica set name given to the mongodb cluster                      | `rs0`                                          |
-| `mongoAuditWatcher.mongoPasswordKey`    | Name of the secret key that has the password                       | `mongodb-root-password`                        |
-| `mongoAuditWatcher.mongoSecret`         | Name of the kubernetes secret that holds the password              | `mongodb`                                      |
-| `labels`                                | Configurable [labels] applied to all database agent pods           | {}                                             |
-| `logging.level`                         | The logging level                                                  | `info`                                         |
-| `nameOverride`                          | Overrides the chart name for resources. default to `.Chart.Name`   | `""`                                           |
-| `nodeSelector`                          | Configurable [nodeSelector]                                        | `{}`                                           |
-| `persistence.accessMode`                | Access mode for the volume                                         | `ReadWriteOnce`                                |
-| `persistence.annotations`               | Annotations for the volume                                         | {}                                             |
-| `persistence.enabled`                   | Enable a persistent volume                                         | true                                           |
-| `persistence.size`                      | Size of volume                                                     | `1Gi`                                          |
-| `persistence.storageClass`              | Storage class to use                                               | `nfs-client`                                   |
-| `podAnnotations`                        | Configurable [annotations]                                         | {}                                             |
-| `podSecurityContext`                    | Allows you to set the [securityContext] for the pod                | see [values.yaml]                              |
-| `resources`                             | Allows you to set the [resources] for the Deployment               | see [values.yaml]                              |
-| `securityContext`                       | Allows you to set the [securityContext] for the container          | see [values.yaml]                              |
-| `service`                               | Configurable [service][] to expose the database agent              | see [values.yaml]                              |
-| `serviceAccount`                        | Allows you to overwrite the "default" [serviceAccount] for the pod | see [values.yaml]                              |
-| `tolerations`                           | Configurable [tolerations][]                                       | `[]`                                           |
+| Parameter                                                  | Description                                                                | Default                             |
+| ---------------------------------------------------------- | -------------------------------------------------------------------------- | ----------------------------------- |
+| `affinity`                                                 | Configurable [affinity]                                                    | {}                                  |
+| `fullnameOverride`                                         | Overrides the full name of the resources.                                  | `""`                                |
+| `image.repository`                                         | `database-agent` image repository                                          | `dbomproject/mongodb-audit-watcher` |
+| `image.tag`                                                | `database-agent` image tag                                                 | `1.0.0`                             |
+| `image.pullPolicy`                                         | The Kubernetes [imagePullPolicy] value                                     | `IfNotPresent`                      |
+| `imagePullSecrets`                                         | Configuration for [imagePullSecrets] for using a private registry          | `[]`                                |
+| `mongoAuditWatcher.persistPath`                            | Path to persistent storage                                                 | `database-agent`                    |
+| `mongoAuditWatcher.mongohost`                              | Mongo host to connect to                                                   | `mongodb`                           |
+| `mongoAuditWatcher.mongoReplicaSetName`                    | Replica set name given to the mongodb cluster                              | `rs0`                               |
+| `mongoAuditWatcher.mongoPasswordKey`                       | Name of the secret key that has the password                               | `mongodb-root-password`             |
+| `mongoAuditWatcher.mongoSecret`                            | Name of the kubernetes secret that holds the password                      | `mongodb`                           |
+| `mongoDBAuditWatcher.mongoServerSelectionTimeout`          | Timeout for server selection                                               | `3000`                              |
+| `mongoDBAuditWatcher.mongoConnectionTimeout`               | Timeout for initial connection to mongodb                                  | `3000`                              |
+| `mongoDBAuditWatcher.mongoTLS.enabled`                     | Whether TLS connections and X509 authentication & authorization is enabled | `false`                             |
+| `mongoDBAuditWatcher.mongoTLS.allowInvalidHosts`           | Whether the host portion of the certificate is validated                   | `false`                             |
+| `mongoDBAuditWatcher.mongoTLS.certs.secret`                | Name of secret where certificates are declared                             | `""`                                 |
+| `mongoDBAuditWatcher.mongoTLS.certs.secretPath`            | Path where certificates in the secret are to be mounted                    | `/secrets/`                         |
+| `mongoDBAuditWatcher.mongoTLS.certs.caCertKey`             | The key in the secret where the CA certificate is declared                 | `ca.pem`                            |
+| `mongoDBAuditWatcher.mongoTLS.certs.clientCertKey`         | The key in the secret where the client certificate is declared             | `client.pem`                        |
+| `mongoDBAuditWatcher.mongoTLS.certs.clientCertIsEncrypted` | Whether the client certificate is encrypted with a passphrase              | `false`                             |
+| `mongoDBAuditWatcher.mongoTLS.certs.clientCertPassSecret`  | If client certificate is encrypted, secret where passkey is stored         | `""`                                 |
+| `mongoDBAuditWatcher.mongoTLS.certs.clientCertPassKey`     | If client certificate is encrypted, key of the passkey in the secret       | `MONGO_TLS_CLIENT_CERT_PASS`        |
+| `labels`                                                   | Configurable [labels] applied to all database agent pods                   | {}                                  |
+| `logging.level`                                            | The logging level                                                          | `info`                              |
+| `nameOverride`                                             | Overrides the chart name for resources. default to `.Chart.Name`           | `""`                                |
+| `nodeSelector`                                             | Configurable [nodeSelector]                                                | `{}`                                |
+| `persistence.accessMode`                                   | Access mode for the volume                                                 | `ReadWriteOnce`                     |
+| `persistence.annotations`                                  | Annotations for the volume                                                 | {}                                  |
+| `persistence.enabled`                                      | Enable a persistent volume                                                 | true                                |
+| `persistence.size`                                         | Size of volume                                                             | `1Gi`                               |
+| `persistence.storageClass`                                 | Storage class to use                                                       | `nfs-client`                        |
+| `podAnnotations`                                           | Configurable [annotations]                                                 | {}                                  |
+| `podSecurityContext`                                       | Allows you to set the [securityContext] for the pod                        | see [values.yaml]                   |
+| `resources`                                                | Allows you to set the [resources] for the Deployment                       | see [values.yaml]                   |
+| `securityContext`                                          | Allows you to set the [securityContext] for the container                  | see [values.yaml]                   |
+| `service`                                                  | Configurable [service][] to expose the database agent                      | see [values.yaml]                   |
+| `serviceAccount`                                           | Allows you to overwrite the "default" [serviceAccount] for the pod         | see [values.yaml]                   |
+| `tolerations`                                              | Configurable [tolerations][]                                               | `[]`                                |
 
 
 [affinity]: https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#affinity-and-anti-affinity

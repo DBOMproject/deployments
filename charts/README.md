@@ -1,1 +1,1 @@
-We are in the process of cleaning internal references and open-sourcing this portion of the DBoM node. Stay Tuned!
+Go to a subfolder to view the README for each service.

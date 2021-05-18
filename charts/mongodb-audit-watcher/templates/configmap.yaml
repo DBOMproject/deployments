@@ -3,13 +3,26 @@ kind: ConfigMap
 metadata:
   name: {{ include "mongodb-audit-watcher.fullname" . }}-config
 data:
-  LOG_LEVEL: {{ .Values.logging.level }}
-  MONGO_HOST: {{ .Values.mongoDBAuditWatcher.mongohost }}
-  MONGO_PASS_KEY: {{ .Values.mongoDBAuditWatcher.mongoPasswordKey }}
+  LOG_LEVEL: {{ .Values.logging.level | quote }}
+  MONGO_HOST: {{ .Values.mongoDBAuditWatcher.mongohost | quote }}
+  MONGO_PASS_KEY: {{ .Values.mongoDBAuditWatcher.mongoPasswordKey | quote }}
   MONGO_PORT: "27017"
   MONGO_USER: root
-  MONGO_REPLICA_SET_NAME: {{ .Values.mongoDBAuditWatcher.mongoReplicaSetName }}
+  MONGO_REPLICA_SET_NAME: {{ .Values.mongoDBAuditWatcher.mongoReplicaSetName | quote }}
   CHANNEL_DB: primary
   AUDIT_POSTFIX: _audit
-  PERSIST_PATH: {{ .Values.mongoDBAuditWatcher.persistPath }}
+  PERSIST_PATH: {{ .Values.mongoDBAuditWatcher.persistPath | quote }}
+  MONGO_SERVER_SELECTION_TIMEOUT: {{ .Values.mongoDBAuditWatcher.mongoServerSelectionTimeout | quote }}
+  MONGO_CONNECTION_TIMEOUT: {{ .Values.mongoDBAuditWatcher.mongoConnectionTimeout | quote }}
+  {{ if .Values.mongoDBAuditWatcher.mongoTLS.enabled }}
+  MONGO_TLS_MODE_ENABLED: "1"
+  MONGO_TLS_CA_CERT_PATH: {{ .Values.mongoDBAuditWatcher.mongoTLS.certs.secretPath }}{{ .Values.mongoDBAuditWatcher.mongoTLS.certs.caCertKey }}
+  MONGO_TLS_CLIENT_CERT_PATH: {{ .Values.mongoDBAuditWatcher.mongoTLS.certs.secretPath }}{{ .Values.mongoDBAuditWatcher.mongoTLS.certs.clientCertKey }}
+  {{ if .Values.mongoDBAuditWatcher.mongoTLS.allowInvalidHosts }}
+  MONGO_TLS_ALLOW_INVALID_HOST: "1" 
+  {{ end }}
+  {{ if .Values.mongoDBAuditWatcher.mongoTLS.certs.clientCertIsEncrypted }}
+  MONGO_TLS_CLIENT_CERT_PASS_KEY: {{ .Values.mongoDBAuditWatcher.mongoTLS.certs.clientCertPassKey | quote}}
+  {{ end }}
+  {{ end }}
 

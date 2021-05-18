@@ -37,13 +37,23 @@ spec:
               protocol: TCP
           envFrom:
             - configMapRef:
-                name: {{.Values.databaseAgent.depname}}-config
+                name: {{ .Values.databaseAgent.depname }}-config
             - secretRef:
-                name: {{.Values.databaseAgent.mongoSecret}}
+                name: {{ .Values.databaseAgent.mongoSecret }}
+          {{ if .Values.databaseAgent.mongoTLS.certs.clientCertIsEncrypted }}
+            - secretRef:
+                name: {{ .Values.databaseAgent.mongoTLS.certs.clientCertPassSecret }}
+          {{ end }}
           readinessProbe:
             httpGet:
               path: /
               port: http
+          {{ if .Values.databaseAgent.mongoTLS.enabled }}
+          volumeMounts:
+            - name: certs-vol
+              mountPath: {{ .Values.databaseAgent.mongoTLS.certs.secretPath }}
+              readOnly: true
+          {{ end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
       {{- with .Values.nodeSelector }}
@@ -58,3 +68,9 @@ spec:
       tolerations:
         {{- toYaml . | nindent 8 }}
     {{- end }}
+    {{ if .Values.databaseAgent.mongoTLS.enabled }}
+      volumes:
+      - name: certs-vol
+        secret:
+          secretName: {{ .Values.databaseAgent.mongoTLS.certs.secret }}
+    {{ end }}
