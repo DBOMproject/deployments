@@ -28,10 +28,10 @@ Clone this Git repository and navigate to the docker-compose-quickstart folder
 Launch the network using docker-compose
 
 ```
-docker-compose -f docker-compose.yaml up -d --build
+docker-compose -f docker-compose.yaml up -d 
 ```
 
-Once you run this command, the images will be built from the source code and then the containers will be up and running. You can check the status of the containers by running the following command
+Once you run this command, the latest images will be pulled from DockerHub and the containers will come up. If you want to use a specific version of the containers, please edit the compose file to point to the appropriate versions
 
 ```
 docker-compose ps
