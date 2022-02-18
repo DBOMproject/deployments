@@ -1,0 +1,15 @@
+meta:
+  version: v1.0
+agents:
+  - DB1:
+      version: 1
+      host: database-agent
+      port: 3500
+      enabled: True
+  - iota:
+      version: 1
+      host: iota-agent
+      port: 4000
+      enabled: True
+
+
