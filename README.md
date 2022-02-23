@@ -1,11 +1,14 @@
 # Deployments
 
-This repository contains the deployment artifacts that can be used to deploy production instances of the DBoM Node (as helm charts) and a version that you can execute locally (with Docker Compose)
+This repository contains the deployment artifacts that can be used to deploy production instances of the DBoM Node (as helm charts) and a version that you can execute locally (with Docker Compose).
+
+This repository also contains deployment artifacts to configure autochannel setup for a DBoM node by subscribing to a remote channel on another DBoM node(with Docker Compose).
 
 ## Usage
 
 - [Deploying to Kubernetes using Helm Charts](charts/)
 - [Deploying to Docker Compose](docker-compose-quickstart/)
+- [AutoChannel Setup](docker-compose-autochannel-setup)
 
 
 ## Getting help

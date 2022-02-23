@@ -1,0 +1,127 @@
+version: "3.5"
+services:
+  chainsource-gateway:
+    image: dbomproject/chainsource-gateway:latest
+    networks:
+      - dbom
+    ports:
+      - 3000:3000
+    volumes:
+      - "./config/:/app/config/"
+    environment:
+      - LOG_LEVEL=info
+      - PORT=3000
+  mongodb-audit-watcher:
+    image: dbomproject/mongodb-audit-watcher:latest
+    networks:
+      - dbom
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - CHANNEL_DB=${CHANNEL_DB}
+      - AUDIT_POSTFIX=${AUDIT_POSTFIX}
+      - MONGO_PASS=${MONGO_PASS}
+      - MONGO_REPLICA_SET_NAME=${MONGO_REPLICA_SET_NAME}
+      - PERSIST_PATH=/var/audit-persist
+    volumes:
+      - /var/audit-persist
+  database-agent:
+    image: dbomproject/database-agent:latest
+    networks:
+      - dbom
+    ports:
+      - 3500:3500
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    environment:
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - CHANNEL_DB=${CHANNEL_DB}
+      - AUDIT_POSTFIX=${AUDIT_POSTFIX}
+      - MONGO_PASS=${MONGO_PASS}
+      - MONGO_REPLICA_SET_NAME=${MONGO_REPLICA_SET_NAME}
+  mongodb: 
+    image: 'bitnami/mongodb:latest'
+    networks:
+      - dbom
+    environment:
+      - MONGODB_REPLICA_SET_MODE=primary
+      - MONGODB_ADVERTISED_HOSTNAME=mongodb
+      - MONGODB_ROOT_PASSWORD=rootpassword
+      - MONGODB_REPLICA_SET_NAME=rs0
+      - MONGODB_REPLICA_SET_KEY=replicasetkey123
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongodb:27017/test --quiet
+      interval: 10s
+      timeout: 100s
+      retries: 10
+      start_period: 30s  
+    ports:
+      - 27017:27017
+    volumes:
+    - mongodb_data:/data/db
+  homeserver1:
+      image: "matrixdotorg/synapse:latest"
+      container_name: "homeserver1"
+      volumes:
+      - "./data:/data"
+      environment:
+        SYNAPSE_SERVER_NAME: "<<server_name>>"
+        SYNAPSE_REPORT_STATS: "yes"
+      network_mode: "host"
+  db-accesscontrol:
+      container_name: "db-accesscontrol"
+      image: "dbomproject/database-access-control:latest"
+      environment:
+      - MONGO_PUBLIC_URI=${MONGO_PUBLIC_URI}
+      - MONGO_HOST=${MONGO_HOST}
+      - MONGO_PORT=${MONGO_PORT}
+      - MONGO_USER=${MONGO_USER}
+      - MONGO_PASS=${MONGO_PASS}
+      - CHANNEL_DB=${CHANNEL_DB}
+      volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      depends_on:
+      - homeserver1
+      ports:
+      - '4000:4000'
+      networks:
+      - dbom
+      privileged: true
+  fed-agent:
+      container_name: "fed-agent"
+      image: dbomproject/fed-agent
+      environment:
+      - MATRIX_HOMESERVER=${MATRIX_HOMESERVER}
+      - MATRIX_USER_ID=${MATRIX_USER_ID}
+      - MATRIX_USERNAME=${MATRIX_USERNAME}
+      - MATRIX_PASSWORD=${MATRIX_PASSWORD}
+      - PORT= ${PORT}
+      - DATABASE_ACCESSCONTROL_URL=${DATABASE_ACCESSCONTROL_URL}
+      - DB_AGENT_PORT=${DB_AGENT_PORT}
+      - NETWORK=${NETWORK}
+      volumes:
+      - './config/:/tmp/'
+      depends_on:
+      - homeserver1
+      ports:
+      - '6000:6000'
+      networks:
+      - dbom
+
+
+
+      
+volumes:
+  chainsource_data:
+  mongodb_data:
+  mongodb_audit_watcher_persist:
+
+networks:
+  dbom:

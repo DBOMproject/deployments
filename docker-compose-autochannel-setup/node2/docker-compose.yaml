@@ -1,0 +1,64 @@
+version: "3.5"
+services:
+  chainsource-gateway:
+    image: dbomproject/chainsource-gateway:latest
+    networks:
+      - dbom
+    ports:
+      - 3000:3000
+    volumes:
+      - "./config/:/app/config/"
+    environment:
+      - LOG_LEVEL=info
+      - PORT=3000
+  homeserver2:
+      image: "matrixdotorg/synapse:latest"
+      container_name: "homeserver2"
+      volumes:
+      - "./data:/data"
+      environment:
+        SYNAPSE_SERVER_NAME: "<<server_name>>"
+        SYNAPSE_REPORT_STATS: "yes"
+      network_mode: "host"
+  db-accesscontrol:
+      container_name: "db-accesscontrol"
+      image: "dbomproject/database-access-control:latest"
+      environment:
+      - CHANNEL_DB=${CHANNEL_DB}
+      - AUDIT_POSTFIX=${AUDIT_POSTFIX}
+      volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
+      depends_on:
+      - homeserver2
+      ports:
+      - '4000:4000'
+      networks:
+      - dbom
+      privileged: true
+  fed-agent:
+      container_name: fed-agent
+      image: dbomproject/fed-agent:latest
+      environment:
+      - MATRIX_HOMESERVER=${MATRIX_HOMESERVER}
+      - MATRIX_USER_ID=${MATRIX_USER_ID}
+      - MATRIX_USERNAME=${MATRIX_USERNAME}
+      - MATRIX_PASSWORD=${MATRIX_PASSWORD}
+      - PORT= ${PORT}
+      - DATABASE_ACCESSCONTROL_URL=${DATABASE_ACCESSCONTROL_URL}
+      - DB_AGENT_PORT=${DB_AGENT_PORT}
+      - NETWORK=${NETWORK}
+      depends_on:
+      - homeserver2
+      volumes:
+      - './config:/tmp/'
+      ports:
+      - '6000:6000'
+      networks:
+      - dbom
+      
+volumes:
+  chainsource_data:
+  mongodb_data:
+
+networks:
+  dbom:
