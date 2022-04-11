@@ -126,26 +126,26 @@ Copy the request ID of particular request to accept/reject the request.
 
 To approve a subscription request use the following curl command.
 ```
-  curl -k "http://<<FEDAGENT_URL>>/subscriptionRequests/<<REQUEST_ID_HERE>>/accept"
+  curl -XPOST -k "http://<<FEDAGENT_URL>>/subscriptionRequests/<<REQUEST_ID_HERE>>/accept"
 ```
 
 Example-
 
 ```
-curl -k "http://example.com:6000/subscriptionRequests/<<REQUEST_ID_HERE>>/accept"
+curl -XPOST -k "http://example.com:6000/subscriptionRequests/<<REQUEST_ID_HERE>>/accept"
 ```
 
 ### Reject the subscription request
 
 To reject a subscription request use the following curl command.
 ```
-  curl -k "http://<<FEDAGENT_URL>>/subscriptionRequests/<<REQUEST_ID_HERE>>/reject"
+  curl -XPOST -k "http://<<FEDAGENT_URL>>/subscriptionRequests/<<REQUEST_ID_HERE>>/reject"
 ```
 
 Example-
 
 ```
-curl -k "http://example.com:6000/subscriptionRequests/<<REQUEST_ID_HERE>>/reject"
+curl -XPOST -k "http://example.com:6000/subscriptionRequests/<<REQUEST_ID_HERE>>/reject"
 ```
 
 ## Troubleshooting 
