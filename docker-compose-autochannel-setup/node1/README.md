@@ -107,6 +107,46 @@ curl -XPOST -k -d '{"room_alias_name":"tutorial", "preset": "public_chat","name"
 ```
 Copy the room alias from the output and share it with the other node user.
 
+### Get list of subscription requests 
+
+To query the list of subscription requests use the following curl command.
+```
+  curl -k "http://<<FEDAGENT_URL>>/subscriptionRequests/"
+```
+
+Example-
+
+```
+curl -k "http://example.com:6000/subscriptionRequests/"
+```
+Copy the request ID of particular request to accept/reject the request.
+
+
+### Accept the subscription request
+
+To approve a subscription request use the following curl command.
+```
+  curl -k "http://<<FEDAGENT_URL>>/subscriptionRequests/<<REQUEST_ID_HERE>>/accept"
+```
+
+Example-
+
+```
+curl -k "http://example.com:6000/subscriptionRequests/<<REQUEST_ID_HERE>>/accept"
+```
+
+### Reject the subscription request
+
+To reject a subscription request use the following curl command.
+```
+  curl -k "http://<<FEDAGENT_URL>>/subscriptionRequests/<<REQUEST_ID_HERE>>/reject"
+```
+
+Example-
+
+```
+curl -k "http://example.com:6000/subscriptionRequests/<<REQUEST_ID_HERE>>/reject"
+```
 
 ## Troubleshooting 
 
@@ -124,6 +164,8 @@ chgrp '<user_grp>' <filename>
 docker ps
 docker logs <container_id_from_ps_cmd>
 ```
+
+- The queue for holding subscription requests is in-memory implementation so the subscription requests will be erased on closing the fedagent application.
 
 
 
