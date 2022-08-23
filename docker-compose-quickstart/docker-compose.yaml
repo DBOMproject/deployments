@@ -1,75 +1,75 @@
-version: "3.5"
+version: '3.5'
 services:
-  chainsource-gateway:
-    image: dbomproject/chainsource-gateway:latest
-    networks:
-      - dbom
-    ports:
-      - 3000:3000
-    volumes:
-      - "./agent-config.yaml:/app/config/agent-config.yaml"
-    environment:
-      - LOG_LEVEL=info
-      - PORT=3000
-  mongodb-audit-watcher:
-    image: dbomproject/mongodb-audit-watcher:latest
-    networks:
-      - dbom
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    environment:
-      - MONGO_HOST=mongodb
-      - MONGO_PORT=27017
-      - MONGO_USER=root
-      - CHANNEL_DB=primary
-      - AUDIT_POSTFIX=_audit
-      - MONGO_PASS=rootpassword
-      - MONGO_REPLICA_SET_NAME=rs0
-      - PERSIST_PATH=/var/audit-persist
-    volumes:
-      - /var/audit-persist
-  database-agent:
-    image: dbomproject/database-agent:latest
-    networks:
-      - dbom
-    ports:
-      - 3500:3500
-    depends_on:
-      mongodb:
-        condition: service_healthy
-    environment:
-      - MONGO_HOST=mongodb
-      - MONGO_PORT=27017
-      - MONGO_USER=root
-      - CHANNEL_DB=primary
-      - AUDIT_POSTFIX=_audit
-      - MONGO_PASS=rootpassword
-      - MONGO_REPLICA_SET_NAME=rs0
-  mongodb: 
-    image: 'bitnami/mongodb:latest'
-    networks:
-      - dbom
-    environment:
-      - MONGODB_REPLICA_SET_MODE=primary
-      - MONGODB_ADVERTISED_HOSTNAME=mongodb
-      - MONGODB_ROOT_PASSWORD=rootpassword
-      - MONGODB_REPLICA_SET_NAME=rs0
-      - MONGODB_REPLICA_SET_KEY=replicasetkey123
-    healthcheck:
-      test: echo 'db.runCommand("ping").ok' | mongo mongodb:27017/test --quiet
-      interval: 10s
-      timeout: 100s
-      retries: 10
-      start_period: 30s
-    ports:
-      - 27017:27017
-    volumes:
-    - mongodb_data:/data/db
-      
+    chainsource-gateway:
+        image: dbomproject/chainsource-gateway:latest
+        networks:
+            - dbom
+        ports:
+            - 3000:3000
+        volumes:
+            - './agent-config.yaml:/app/config/agent-config.yaml'
+        environment:
+            - LOG_LEVEL=info
+            - PORT=3000
+    mongodb-audit-watcher:
+        image: dbomproject/mongodb-audit-watcher:latest
+        networks:
+            - dbom
+        depends_on:
+            mongodb:
+                condition: service_healthy
+        environment:
+            - MONGO_HOST=mongodb
+            - MONGO_PORT=27017
+            - MONGO_USER=root
+            - CHANNEL_DB=primary
+            - AUDIT_POSTFIX=_audit
+            - MONGO_PASS=rootpassword
+            - MONGO_REPLICA_SET_NAME=rs0
+            - PERSIST_PATH=/var/audit-persist
+        volumes:
+            - /var/audit-persist
+    database-agent:
+        image: dbomproject/database-agent:latest
+        networks:
+            - dbom
+        ports:
+            - 3500:3500
+        depends_on:
+            mongodb:
+                condition: service_healthy
+        environment:
+            - MONGO_HOST=mongodb
+            - MONGO_PORT=27017
+            - MONGO_USER=root
+            - CHANNEL_DB=primary
+            - AUDIT_POSTFIX=_audit
+            - MONGO_PASS=rootpassword
+            - MONGO_REPLICA_SET_NAME=rs0
+    mongodb:
+        image: 'bitnami/mongodb:6.0.1'
+        networks:
+            - dbom
+        environment:
+            - MONGODB_REPLICA_SET_MODE=primary
+            - MONGODB_ADVERTISED_HOSTNAME=mongodb
+            - MONGODB_ROOT_PASSWORD=rootpassword
+            - MONGODB_REPLICA_SET_NAME=rs0
+            - MONGODB_REPLICA_SET_KEY=replicasetkey123
+        healthcheck:
+            test: echo 'db.runCommand("ping").ok;' | mongosh mongodb:27017/test --quiet
+            interval: 10s
+            timeout: 100s
+            retries: 10
+            start_period: 30s
+        ports:
+            - 27017:27017
+        volumes:
+            - mongodb_data:/data/db
+
 volumes:
-  chainsource_data:
-  mongodb_data:
+    chainsource_data:
+    mongodb_data:
 
 networks:
-  dbom:
+    dbom:
