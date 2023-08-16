@@ -1,0 +1,153 @@
+version: "3"
+services:
+  na_1:
+    image: nats:latest
+    command: -c /nat_server_1.conf --name nats1 -p 4222
+    volumes:
+      - ./server_1.conf:/nat_server_1.conf
+    ports:
+      - 4222:4222
+    networks:
+      - dbom-network
+  mongo_db_one:
+    container_name: mongo_db_one
+    restart: always
+    build: 
+      context: ../../database-agent/src/mongodb_replica
+      dockerfile: ./Dockerfile
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: prisma
+      MONGO_INITDB_DATABASE: dbom
+      MONGO_REPLICA_HOST: mongo_db_one
+      MONGO_REPLICA_PORT: 27018
+    logging:
+      driver: none # Disable logging for this container
+    ports:
+      - 27018:27018
+    volumes:
+      - mongo_db_one:/data/db
+    networks:
+      - dbom-network
+
+  database_agent_one:
+    container_name: database_agent_one
+    restart: always
+    build:
+      context: ../../database-agent
+      dockerfile: ./Dockerfile
+    depends_on:
+      - na_1
+      - mongo_db_one
+    links:
+      - na_1
+      - mongo_db_one
+    command: ["sh", "-c", "sleep 2 && npm run migrate && npm run start"]
+    environment:
+      NATS_URI: nats://na_1:4222
+      DATABASE_URL: mongodb://root:prisma@mongo_db_one:27018/dbom?authSource=admin
+      NODE_ID: node1
+    networks:
+      - dbom-network
+
+  chainsource_gateway_one:
+    container_name: node1.test.com
+    build:
+      context: ../../chainsource-gateway
+      dockerfile: ./Dockerfile
+    ports:
+      - 3050:3050
+      - 7205:7205
+    depends_on:
+      - na_1
+    links:
+      - na_1
+    environment:
+      NATS_URI: nats://na_1:4222
+      PORT: 3050
+      FED_PORT: 7205
+      LOG_LEVEL: info
+      NODE_ID: node1
+      NODE_URI: node1.test.com
+
+    networks:
+      - dbom-network
+  na_2:
+    image: nats:latest
+    command: -c /nat_server_2.conf --name nats2 -p 4223
+    volumes:
+      - ./server_2.conf:/nat_server_2.conf
+    ports:
+      - 4223:4223
+    networks:
+      - dbom-network
+  mongo_db_two:
+    container_name: mongo_db_two
+    restart: always
+    build: 
+      context: ../../database-agent/src/mongodb_replica
+      dockerfile: ./Dockerfile
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: prisma
+      MONGO_INITDB_DATABASE: dbom
+      MONGO_REPLICA_HOST: mongo_db_two
+      MONGO_REPLICA_PORT: 27019
+    logging:
+      driver: none # Disable logging for this container
+    ports:
+      - 27019:27019
+    volumes:
+      - mongo_db_two:/data/db
+    networks:
+      - dbom-network
+
+  database_agent_two:
+    container_name: database_agent_two
+    restart: always
+    build:
+      context: ../../database-agent
+      dockerfile: ./Dockerfile
+    depends_on:
+      - na_2
+      - mongo_db_two
+    links:
+      - na_2
+      - mongo_db_two
+    command: ["sh", "-c", "sleep 2 && npm run migrate && npm run start"]
+    environment:
+      NATS_URI: nats://na_2:4223
+      DATABASE_URL: mongodb://root:prisma@mongo_db_two:27019/dbom?authSource=admin
+      NODE_ID: node2
+    networks:
+      - dbom-network
+
+  chainsource_gateway_two:
+    container_name: node2.test.com
+    build:
+      context: ../../chainsource-gateway
+      dockerfile: ./Dockerfile
+    ports:
+      - 3051:3050
+      - 7206:7205
+    depends_on:
+      - na_2
+    links:
+      - na_2
+    environment:
+      NATS_URI: nats://na_2:4223
+      PORT: 3050
+      FED_PORT: 7205
+      LOG_LEVEL: info
+      NODE_ID: node2
+      NODE_URI: node2.test.com
+
+    networks:
+      - dbom-network
+volumes:
+  mongo_db_one: {}
+  mongo_db_two: {}
+
+networks:
+  dbom-network:
+    driver: bridge

@@ -23,21 +23,33 @@ described in the [API Specs]{.title-ref}.
 
 ### Terminal Window
 
-#### Step 1 [For docker-compose-quickstart]
-
-Clone the [deployments
-repository](https://github.com/DBOMproject/deployments) check out to
-`2.0.0-alpha-1` branch and navigate to the `docker-compose-quickstart` folder
+#### Step 1 [For docker-compose-quickstart-local]
 
 ``` shell
+  # Create a directory to clone the repositories
+  mkdir dbom
+
+  # Navigate to the directory
+  cd dbom
+
   # Clone the deployments repository
   git clone https://github.com/DBOMproject/deployments.git
 
-  # Checkout to 2.0.0-alpha-1
+  # Clone the chainsource-gateway repository
+  git clone https://github.com/DBOMproject/chainsource-gateway.git
+
+  # Clone the database-agent repository
+  git clone https://github.com/DBOMproject/database-agent.git
+
+  # NOTE: Checkout to 2.0.0-alpha-1 branch on all the repositories
   git checkout 2.0.0-alpha-1
 
-  # Navigate to the docker-compose-quickstart folder
-  cd deployments/docker-compose-quickstart
+  # NOTE: Generate certificates
+  cd chainsource-gateway
+  go run src/certs/generate_cert.go node1.test.com
+  
+  # Navigate to the docker-compose-quickstart-local folder
+  cd deployments/docker-compose-quickstart-local
 ```
 
 #### Step 2

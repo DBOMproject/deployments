@@ -1,4 +1,4 @@
-# Getting Started with Digital Bill of Materials
+# Getting Started with Digital Bill of Materials - Setup Multiple Nodes
 
 This tutorial will describe how to get started with the digital bill of
 materials using docker. The sample docker-compose file will build and
@@ -23,21 +23,33 @@ described in the [API Specs]{.title-ref}.
 
 ### Terminal Window
 
-#### Step 1 [For docker-compose-quickstart]
-
-Clone the [deployments
-repository](https://github.com/DBOMproject/deployments) check out to
-`2.0.0-alpha-1` branch and navigate to the `docker-compose-quickstart` folder
+#### Step 1
 
 ``` shell
+  # Create a directory to clone the repositories
+  mkdir dbom
+
+  # Navigate to the directory
+  cd dbom
+
   # Clone the deployments repository
   git clone https://github.com/DBOMproject/deployments.git
 
-  # Checkout to 2.0.0-alpha-1
+  # Clone the chainsource-gateway repository
+  git clone https://github.com/DBOMproject/chainsource-gateway.git
+
+  # Clone the database-agent repository
+  git clone https://github.com/DBOMproject/database-agent.git
+
+  # NOTE: Checkout to 2.0.0-alpha-1 branch on all the repositories
   git checkout 2.0.0-alpha-1
 
-  # Navigate to the docker-compose-quickstart folder
-  cd deployments/docker-compose-quickstart
+  # Generate certificates
+  cd chainsource-gateway
+  go run src/certs/generate_cert.go node1.test.com node2.test.com
+  
+  # Navigate to the docker-compose-quickstart-example-two-nodes folder
+  cd deployments/docker-compose-quickstart-example-two-nodes
 ```
 
 #### Step 2
@@ -64,7 +76,7 @@ The output of the above command should be similar to the one below
 
 #### Step 3
 
-With the containers started, next, test the APIs by executing the script *testAPIs.sh*. This will create few channels and assets.
+With the containers started, next, test the APIs by executing the script *testAPIs.sh*. This will create few channels and assets on both the nodes.
 
 ``` shell
 ./testAPIs.sh

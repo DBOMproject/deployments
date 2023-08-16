@@ -1,3 +1,0 @@
-Completed the deployment of {{ include "mongodb-audit-watcher.fullname" . }}.
-
-This service does not expose any ports.
