@@ -4,8 +4,7 @@ This repository contains the deployment artifacts that can be used to deploy pro
 
 ## Usage
 
-- [**[WIP]** Deploying to Docker Compose](docker-compose-quickstart/README.md)
-- [Setup DBoM Node Locally](docker-compose-quickstart-local/README.md)
+- [Deploying to Docker Compose](docker-compose-quickstart/README.md)
 - [**Example** - Setup Multiple DBoM Nodes Locally](docker-compose-example-two-nodes/README.md)
 
 ## Getting help

@@ -7,7 +7,7 @@ run the required containers to get started.
 - chainsource-gateway
 - database-agent
 - nats
-- mongodb (with prisma)
+- mongodb (local - with prisma)
 
 Once these containers are running, the DBoM gateway
 (chainsource-gateway) provides a REST interface with the APIs as
@@ -26,30 +26,14 @@ described in the [API Specs]{.title-ref}.
 #### Step 1
 
 ``` shell
-  # Create a directory to clone the repositories
-  mkdir dbom
+# Clone the deployments repository
+git clone https://github.com/DBOMproject/deployments.git
 
-  # Navigate to the directory
-  cd dbom
+# Checkout to 2.0.0-alpha-1
+git checkout 2.0.0-alpha-1
 
-  # Clone the deployments repository
-  git clone https://github.com/DBOMproject/deployments.git
-
-  # Clone the chainsource-gateway repository
-  git clone https://github.com/DBOMproject/chainsource-gateway.git
-
-  # Clone the database-agent repository
-  git clone https://github.com/DBOMproject/database-agent.git
-
-  # NOTE: Checkout to 2.0.0-alpha-1 branch on all the repositories
-  git checkout 2.0.0-alpha-1
-
-  # Generate certificates
-  cd chainsource-gateway
-  go run src/certs/generate_cert.go node1.test.com node2.test.com
-  
-  # Navigate to the docker-compose-quickstart-example-two-nodes folder
-  cd deployments/docker-compose-quickstart-example-two-nodes
+# Navigate to the docker-compose-example-two-nodes folder
+cd deployments/docker-compose-example-two-nodes
 ```
 
 #### Step 2
@@ -57,7 +41,12 @@ described in the [API Specs]{.title-ref}.
 Launch the network using docker-compose
 
 ``` shell
-docker compose up
+# Generate certificates
+# node1.test.com and node2.test.com - should be same as your containers/nodes name
+docker compose -f docker-compose-certs.yml  run --rm certificate_generator ./Generator node1.test.com node2.test.com
+
+# Run all the services
+docker compose up -d
 ```
 
 Once you run this command, the images will be built from the source code
@@ -71,7 +60,7 @@ docker ps
 The output of the above command should be similar to the one below
 
 <p align="center">
-  <img src="images/docker-ps.png">
+  <img src="assets/docker-ps.png">
 </p>
 
 #### Step 3

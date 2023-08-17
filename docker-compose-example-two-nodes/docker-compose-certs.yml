@@ -1,0 +1,15 @@
+version: "3"
+services:
+  certificate_generator:
+    container_name: certificate_generator
+    build:
+      context: ./config/certificate_generator
+      dockerfile: Dockerfile
+    volumes:
+      - ./certs:/app/certs
+    networks:
+      - dbom-network
+
+networks:
+  dbom-network:
+    driver: bridge

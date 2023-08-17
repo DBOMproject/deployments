@@ -6,8 +6,8 @@ run the required containers to get started.
 
 - chainsource-gateway
 - database-agent
-- nats
-- mongodb (with prisma)
+- nats 
+- mongodb (local - with prisma)
 
 Once these containers are running, the DBoM gateway
 (chainsource-gateway) provides a REST interface with the APIs as
@@ -30,14 +30,14 @@ repository](https://github.com/DBOMproject/deployments) check out to
 `2.0.0-alpha-1` branch and navigate to the `docker-compose-quickstart` folder
 
 ``` shell
-  # Clone the deployments repository
-  git clone https://github.com/DBOMproject/deployments.git
+# Clone the deployments repository
+git clone https://github.com/DBOMproject/deployments.git
 
-  # Checkout to 2.0.0-alpha-1
-  git checkout 2.0.0-alpha-1
+# Checkout to 2.0.0-alpha-1
+git checkout 2.0.0-alpha-1
 
-  # Navigate to the docker-compose-quickstart folder
-  cd deployments/docker-compose-quickstart
+# Navigate to the docker-compose-quickstart folder
+cd deployments/docker-compose-quickstart
 ```
 
 #### Step 2
@@ -45,7 +45,12 @@ repository](https://github.com/DBOMproject/deployments) check out to
 Launch the network using docker-compose
 
 ``` shell
-docker compose up
+# Generate certificates
+# node1.test.com - should be same as your container/node name
+docker compose -f docker-compose-certs.yml  run --rm certificate_generator ./Generator node1.test.com
+
+# Run all the services
+docker compose up -d
 ```
 
 Once you run this command, the images will be built from the source code
@@ -59,7 +64,7 @@ docker ps
 The output of the above command should be similar to the one below
 
 <p align="center">
-  <img src="images/docker-ps.png">
+  <img src="assets/docker-ps.png">
 </p>
 
 #### Step 3

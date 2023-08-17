@@ -1,10 +1,20 @@
 version: "3"
 services:
+  certificate_generator:
+    container_name: certificate_generator
+    build:
+      context: ./config/certificate_generator
+      dockerfile: Dockerfile
+    command: ["./Generator", "node1.test.com", "node2.test.com"]
+    volumes:
+      - ./certs:/app/certs
+    networks:
+      - dbom-network
   na_1:
     image: nats:latest
     command: -c /nat_server_1.conf --name nats1 -p 4222
     volumes:
-      - ./server_1.conf:/nat_server_1.conf
+      - ./config/nats/server_1.conf:/nat_server_1.conf
     ports:
       - 4222:4222
     networks:
@@ -12,17 +22,15 @@ services:
   mongo_db_one:
     container_name: mongo_db_one
     restart: always
-    build: 
-      context: ../../database-agent/src/mongodb_replica
-      dockerfile: ./Dockerfile
+    build:
+      context: ./config/mongodb_replica
+      dockerfile: Dockerfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: prisma
       MONGO_INITDB_DATABASE: dbom
       MONGO_REPLICA_HOST: mongo_db_one
       MONGO_REPLICA_PORT: 27018
-    logging:
-      driver: none # Disable logging for this container
     ports:
       - 27018:27018
     volumes:
@@ -33,9 +41,7 @@ services:
   database_agent_one:
     container_name: database_agent_one
     restart: always
-    build:
-      context: ../../database-agent
-      dockerfile: ./Dockerfile
+    image: dbomproject/database-agent:2.0.0-alpha-1
     depends_on:
       - na_1
       - mongo_db_one
@@ -52,9 +58,7 @@ services:
 
   chainsource_gateway_one:
     container_name: node1.test.com
-    build:
-      context: ../../chainsource-gateway
-      dockerfile: ./Dockerfile
+    image: dbomproject/chainsource-gateway:2.0.0-alpha-1
     ports:
       - 3050:3050
       - 7205:7205
@@ -69,14 +73,20 @@ services:
       LOG_LEVEL: info
       NODE_ID: node1
       NODE_URI: node1.test.com
-
+      NODE_CERT_PATH: /app/certs/node1.test.com.crt
+      NODE_KEY_PATH: /app/certs/node1.test.com.key
+      CA_CERT_PATH: /app/certs/ca.crt
+    volumes:
+      - ./certs/node1.test.com.crt:/app/certs/node1.test.com.crt
+      - ./certs/node1.test.com.key:/app/certs/node1.test.com.key
+      - ./certs/ca.crt:/app/certs/ca.crt
     networks:
       - dbom-network
   na_2:
     image: nats:latest
     command: -c /nat_server_2.conf --name nats2 -p 4223
     volumes:
-      - ./server_2.conf:/nat_server_2.conf
+      - ./config/nats/server_2.conf:/nat_server_2.conf
     ports:
       - 4223:4223
     networks:
@@ -84,17 +94,15 @@ services:
   mongo_db_two:
     container_name: mongo_db_two
     restart: always
-    build: 
-      context: ../../database-agent/src/mongodb_replica
-      dockerfile: ./Dockerfile
+    build:
+      context: ./config/mongodb_replica
+      dockerfile: Dockerfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: prisma
       MONGO_INITDB_DATABASE: dbom
       MONGO_REPLICA_HOST: mongo_db_two
       MONGO_REPLICA_PORT: 27019
-    logging:
-      driver: none # Disable logging for this container
     ports:
       - 27019:27019
     volumes:
@@ -105,9 +113,7 @@ services:
   database_agent_two:
     container_name: database_agent_two
     restart: always
-    build:
-      context: ../../database-agent
-      dockerfile: ./Dockerfile
+    image: dbomproject/database-agent:2.0.0-alpha-1
     depends_on:
       - na_2
       - mongo_db_two
@@ -124,9 +130,7 @@ services:
 
   chainsource_gateway_two:
     container_name: node2.test.com
-    build:
-      context: ../../chainsource-gateway
-      dockerfile: ./Dockerfile
+    image: dbomproject/chainsource-gateway:2.0.0-alpha-1
     ports:
       - 3051:3050
       - 7206:7205
@@ -141,7 +145,13 @@ services:
       LOG_LEVEL: info
       NODE_ID: node2
       NODE_URI: node2.test.com
-
+      NODE_CERT_PATH: /app/certs/node2.test.com.crt
+      NODE_KEY_PATH: /app/certs/node2.test.com.key
+      CA_CERT_PATH: /app/certs/ca.crt
+    volumes:
+      - ./certs/node2.test.com.crt:/app/certs/node2.test.com.crt
+      - ./certs/node2.test.com.key:/app/certs/node2.test.com.key
+      - ./certs/ca.crt:/app/certs/ca.crt
     networks:
       - dbom-network
 volumes:

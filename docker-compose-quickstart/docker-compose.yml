@@ -1,48 +1,55 @@
 version: "3"
 services:
-  nats_service:
-    image: nats:latest
-    command: -c /nat_server.conf --name natsservice -p 4222
-    volumes:
-      - ./server.conf:/nat_server.conf
-    ports:
-      - 4222:4222
-    networks:
-      - dbom-network
   mongo_db_service:
     container_name: mongo_db_service
     restart: always
     build: 
-      context: ../../database-agent/src/mongodb_replica
-      dockerfile: ./Dockerfile
+      context: ./config/mongodb_replica
+      dockerfile: Dockerfile
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: prisma
       MONGO_INITDB_DATABASE: dbom
       MONGO_REPLICA_HOST: mongo_db_service
       MONGO_REPLICA_PORT: 27018
-    logging:
-      driver: none # Disable logging for this container
     ports:
       - 27018:27018
     volumes:
       - mongo_db_service:/data/db
     networks:
       - dbom-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongo mongo:27018/test --quiet
+      interval: 10s
+      timeout: 10s
+      retries: 5
+      start_period: 40s
+
+  nats_service:
+      image: nats:latest
+      command: -c /nat_server.conf --name natsservice -p 4222
+      volumes:
+        - ./config/nats/server.conf:/nat_server.conf
+      ports:
+        - 4222:4222
+      networks:
+        - dbom-network
+      healthcheck:
+        test: ["CMD", "nats", "-z", "nats://localhost:4222"]
+        interval: 5s  
+        timeout: 10s 
+        retries: 3
 
   database_agent_service:
     container_name: database_agent_service
-    restart: always
-    build:
-      context: ../../database-agent
-      dockerfile: ./Dockerfile
+    image: dbomproject/database-agent:2.0.0-alpha-1
     depends_on:
       - nats_service
       - mongo_db_service
     links:
       - nats_service
       - mongo_db_service
-    command: ["sh", "-c", "sleep 2 && npm run migrate && npm run start"]
+    command: ["sh", "-c", "sleep 5 && npm run migrate && npm run start"]
     environment:
       NATS_URI: nats://nats_service:4222
       DATABASE_URL: mongodb://root:prisma@mongo_db_service:27018/dbom?authSource=admin
@@ -52,9 +59,7 @@ services:
 
   chainsource_gateway_service:
     container_name: node1.test.com
-    build:
-      context: ../../chainsource-gateway
-      dockerfile: ./Dockerfile
+    image: dbomproject/chainsource-gateway:2.0.0-alpha-1
     ports:
       - 3050:3050
       - 7205:7205
@@ -69,7 +74,13 @@ services:
       LOG_LEVEL: info
       NODE_ID: node1
       NODE_URI: node1.test.com
-
+      NODE_CERT_PATH: /app/certs/node1.test.com.crt
+      NODE_KEY_PATH: /app/certs/node1.test.com.key
+      CA_CERT_PATH: /app/certs/ca.crt
+    volumes:
+      - ./certs/node1.test.com.crt:/app/certs/node1.test.com.crt
+      - ./certs/node1.test.com.key:/app/certs/node1.test.com.key
+      - ./certs/ca.crt:/app/certs/ca.crt
     networks:
       - dbom-network
 
