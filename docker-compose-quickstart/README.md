@@ -11,7 +11,7 @@ run the required containers to get started.
 
 Once these containers are running, the DBoM gateway
 (chainsource-gateway) provides a REST interface with the APIs as
-described in the [API Specs]{.title-ref}.
+described in the [API Specs](https://github.com/DBOMproject/api-specs/tree/2.0.0-alpha-1).
 
 ## Prerequisites and setup
 
@@ -23,7 +23,7 @@ described in the [API Specs]{.title-ref}.
 
 ### Terminal Window
 
-#### Step 1 [For docker-compose-quickstart]
+#### Step 1
 
 Clone the [deployments
 repository](https://github.com/DBOMproject/deployments) check out to
