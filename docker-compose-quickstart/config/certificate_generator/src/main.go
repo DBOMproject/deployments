@@ -116,7 +116,7 @@ func makeCert(caCert *x509.Certificate, caKey *rsa.PrivateKey, subject *pkix.Nam
 func main() {
 	// Check if at least one domain is provided as an argument
 	if len(os.Args) < 2 {
-		fmt.Println("Usage: go run generate_cert.go <domain1> [domain2] [domain3] ...")
+		fmt.Println("Usage: go run main.go <domain1> [domain2] [domain3] ...")
 		return
 	}
 
@@ -128,11 +128,13 @@ func main() {
 	fmt.Println("Generating certificates for domains:", DNSNamesArray)
 	subject := pkix.Name{
 		Country:            []string{"IN"},
-		Organization:       []string{"DBOM"},
-		OrganizationalUnit: []string{"DBOM"},
-		Locality:           []string{"BLR"},
-		Province:           []string{"KA"},
-		CommonName:         "*",
+		Organization:       []string{"CA Company"},
+		OrganizationalUnit: []string{"Sample Organizational Unit"},
+		Locality:           []string{"Sample Locality"},
+		Province:           []string{"Sample Province"},
+		StreetAddress:      []string{"Sample Street Address"},
+		PostalCode:         []string{"123456"},
+		CommonName:         "CA",
 		Names:              []pkix.AttributeTypeAndValue{},
 		ExtraNames:         []pkix.AttributeTypeAndValue{},
 	}
@@ -143,6 +145,8 @@ func main() {
 	log.Println("Created the CA certificate successfully.")
 
 	for _, domain := range os.Args[1:] {
+		subject.CommonName = domain
+		subject.Organization = []string{domain + " Company"}
 		if err := makeCert(caCert, caKey, &subject, domain, DNSNamesArray); err != nil {
 			log.Printf("Failed to make certificate for domain %s: %v", domain, err)
 		} else {

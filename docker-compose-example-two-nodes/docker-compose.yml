@@ -1,15 +1,5 @@
 version: "3"
 services:
-  certificate_generator:
-    container_name: certificate_generator
-    build:
-      context: ./config/certificate_generator
-      dockerfile: Dockerfile
-    command: ["./Generator", "node1.test.com", "node2.test.com"]
-    volumes:
-      - ./certs:/app/certs
-    networks:
-      - dbom-network
   na_1:
     image: nats:latest
     command: -c /nat_server_1.conf --name nats1 -p 4222
