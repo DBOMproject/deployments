@@ -71,4 +71,29 @@ With the containers started, next, test the APIs by executing the script *testAP
 ./testAPIs.sh
 ```
 
+To test federation between two nodes run the below script
+
+``` shell
+./testAPIs-federation.sh
+```
+
+Note: To test federation between two nodes, please provide the correct `requestId` when it prompts.
+
+<p align="center">
+  <img src="assets/federation-accept.png">
+</p>
+
+## Stopping docker containers
+
+``` shell
+# To stop the docker containers, also deletes volumes
+docker compose down
+
+# To stop the docker containers, also deletes volumes
+docker compose down -v
+
+# To stop the docker containers, also deletes images and volumes
+docker compose down --rmi all -v
+```
+
 For more details refer [DBoM Documentation](https://dbom-project.readthedocs.io/en/2.0.0-alpha-1/what-dbom.html)

@@ -1,10 +1,24 @@
 #!/bin/bash
 
+# Function to pretty print JSON using jq
+pretty_print_json() {
+    echo "$1" | perl -MJSON -e 'print JSON->new->pretty->encode(decode_json(join "", <>))'
+}
+
+# Function to display a separator in logs
+log_separator() {
+    echo "------------------------------------------------------------------------------------------------------"
+}
+
 # Node 1 metadata
 echo "Getting Node 1 metadata..."
 curl_result=$(curl --location 'http://localhost:3050/api/v2/nodes/node1/_metadata' \
 --header 'Accept: application/json')
-echo "Node 1 metadata response: $curl_result"
+echo ""
+echo "Node 1 metadata response:"
+pretty_print_json "$curl_result"
+echo ""
+log_separator
 echo ""
 
 # Create channels
@@ -25,7 +39,11 @@ curl_result=$(curl --location 'http://localhost:3050/api/v2/nodes/node1.test.com
 --header 'Content-Type: application/json' \
 --header 'Accept: application/json' \
 --data "$channel_data1")
-echo "Channel creation response for Node 1: $curl_result"
+echo ""
+echo "Channel creation response for Node 1:"
+pretty_print_json "$curl_result"
+echo ""
+log_separator
 echo ""
 
 # Adding assets
@@ -66,5 +84,9 @@ curl_result=$(curl --location 'http://localhost:3050/api/v2/nodes/node1.test.com
 --header 'Content-Type: application/json' \
 --header 'Accept: application/json' \
 --data "$asset_data1")
-echo "Asset addition response for Node 1 (Channel 1, Asset 1): $curl_result"
+echo ""
+echo "Asset addition response for Node 1 (Channel 1, Asset 1):"
+pretty_print_json "$curl_result"
+echo ""
+log_separator
 echo ""
