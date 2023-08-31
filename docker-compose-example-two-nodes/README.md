@@ -86,7 +86,7 @@ Note: To test federation between two nodes, please provide the correct `requestI
 ## Stopping docker containers
 
 ``` shell
-# To stop the docker containers, also deletes volumes
+# To stop the docker containers
 docker compose down
 
 # To stop the docker containers, also deletes volumes
